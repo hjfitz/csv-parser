@@ -1,0 +1,9 @@
+{
+  "name": "csv-parser",
+  "version": "0.0.1",
+  "description": "Promise based CSV -> Object | Object -> CSV parser",
+  "main": "dist/index.js",
+  "repository": "https://github.com/hjfitz/csv-parser",
+  "author": "Harry Fitzgerald <hfitz83@gmail.com>",
+  "license": "GPL-3.0"
+}
