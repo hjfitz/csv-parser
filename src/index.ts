@@ -73,7 +73,7 @@ class Reader {
     this.lines = file.split("\n");
   }
 
-  parseToArray(): Object {
+  parseToObject(): Object {
     const re: RegExp = Reader.genRegex(this.options);
     // clone the array so that we can shift things around
     const lines: Array<String> = this.lines.slice(0);
@@ -102,7 +102,7 @@ class Reader {
     return clean;
   }
 
-  parseToObject() {}
+  parseToArray() {}
 }
 
 export { Reader };
