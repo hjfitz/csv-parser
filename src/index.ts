@@ -39,14 +39,19 @@ class Reader {
     return splitLine;
   }
 
-  static sanitiseDelimiters(dirty, delim): Object {
+  /**
+   * Because of how we parse, we need to remove delimiters.
+   * @param dirty uncleaned object
+   * @return cleaned up object!
+   */
+  static sanitiseDelimiters(dirty): Object {
     const keys: Array<string> = Object.keys(dirty);
     const firstKey: string = keys[0];
-    const cleanFirstKey = firstKey.substring(1);
+    const cleanFirstKey: string = firstKey.substring(1);
     const lastKey: string = keys[keys.length - 1];
-    const cleanLastKey = lastKey.substring(0, lastKey.length - 1);
-    const firstClean = [];
-    const lastClean = [];
+    const cleanLastKey: string = lastKey.substring(0, lastKey.length - 1);
+    const firstClean: Array<string> = [];
+    const lastClean: Array<string> = [];
     dirty[firstKey].forEach(unClean => {
       firstClean.push(unClean.substring(1));
     });
