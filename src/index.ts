@@ -100,10 +100,7 @@ class Reader {
         parsed[header].push(split.shift());
       });
     });
-    const clean: Object = Reader.sanitiseDelimiters(
-      parsed,
-      this.options.delimiter
-    );
+    const clean: Object = Reader.sanitiseDelimiters(parsed);
     return clean;
   }
 
