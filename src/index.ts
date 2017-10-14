@@ -11,6 +11,13 @@ class Reader {
   file: string;
   lines: Array<String>;
 
+  static genRegex({ delimiter, surround }): RegExp {
+    const stringMatch: string =
+      "(" + surround + delimiter + "[^" + surround + "]+" + surround + ")";
+    const regex = new RegExp(stringMatch, "g");
+    return regex;
+  }
+
   /**
    * Initialiser for a reader object
    * @param filename Name of file to be parsed
@@ -23,9 +30,22 @@ class Reader {
     this.lines = file.split("\n");
   }
 
-  parseToArray() {}
+  parseToArray() {
+    const re: RegExp = Reader.genRegex(this.options);
+    // clone the array so that we can shift things around
+    const lines: Array<String> = this.lines.slice(0);
+    // separate the headers from the information
+    const headers: Array<String> = lines.shift().split(this.options.delimiter);
+    const parsed = {};
+    // add keys to parsed - we know they're in order this way
+    // so we can loop through everything else this way.
+    headers.forEach(header => {
+      const key: string = header.toString();
+      parsed[key] = [];
+    });
+  }
 
   parseToObject() {}
 }
 
-export { Reader, Writer };
+export { Reader };
