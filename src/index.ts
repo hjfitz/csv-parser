@@ -76,6 +76,9 @@ class Reader {
     this.options = options;
     const file = fs.readFileSync(filename).toString();
     this.lines = file.split("\n");
+    // RFC 4180 states that a csv file can end in nothing OR
+    // a newline
+    if (this.lines[this.lines.length - 1] === "") this.lines.pop();
   }
 
   parseToObject(): Object {
@@ -93,7 +96,6 @@ class Reader {
       parsed[key] = [];
     });
 
-    if (lines[lines.length - 1] === "") lines.pop();
     lines.forEach(line => {
       const split: Array<string> = line.split(re);
       headers.forEach(header => {
@@ -104,7 +106,35 @@ class Reader {
     return clean;
   }
 
-  parseToArray() {}
+  parseToArray() {
+    const re: RegExp = Reader.genRegex(this.options);
+
+    const lines: Array<String> = this.lines.slice(0);
+
+    const keys: Array<String> = lines
+      .shift()
+      .toString()
+      .split(re);
+
+    const keyEnd: number = keys.length - 1;
+    keys[0] = keys[0].substring(1);
+    keys[keyEnd] = keys[keyEnd].substring(0, keyEnd);
+
+    lines.map(line => {
+      const splitLine: Array<String> = line.split(re);
+      // remove the delimiters
+      const end: number = splitLine.length - 1;
+      splitLine[0] = splitLine[0].substring(1);
+      splitLine[end] = splitLine[end].substring(0, end);
+      const ret: Object = {};
+      keys.forEach(key => {
+        const entry = key.toString();
+        ret[entry] = splitLine.shift();
+      });
+      debugger;
+      return ret;
+    });
+  }
 }
 
 export { Reader };

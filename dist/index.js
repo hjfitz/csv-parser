@@ -12,6 +12,10 @@ var Reader = /** @class */ (function () {
         this.options = options;
         var file = fs.readFileSync(filename).toString();
         this.lines = file.split("\n");
+        // RFC 4180 states that a csv file can end in nothing OR
+        // a newline
+        if (this.lines[this.lines.length - 1] === "")
+            this.lines.pop();
     }
     /**
      * Generates a 'regex' based on our options
@@ -39,7 +43,12 @@ var Reader = /** @class */ (function () {
         var splitLine = line.split(regex);
         return splitLine;
     };
-    Reader.sanitiseDelimiters = function (dirty, delim) {
+    /**
+     * Because of how we parse, we need to remove delimiters.
+     * @param dirty uncleaned object
+     * @return cleaned up object!
+     */
+    Reader.sanitiseDelimiters = function (dirty) {
         var keys = Object.keys(dirty);
         var firstKey = keys[0];
         var cleanFirstKey = firstKey.substring(1);
@@ -59,7 +68,7 @@ var Reader = /** @class */ (function () {
         delete dirty[lastKey];
         return dirty;
     };
-    Reader.prototype.parseToArray = function () {
+    Reader.prototype.parseToObject = function () {
         var re = Reader.genRegex(this.options);
         // clone the array so that we can shift things around
         var lines = this.lines.slice(0);
@@ -73,18 +82,40 @@ var Reader = /** @class */ (function () {
             var key = header.toString();
             parsed[key] = [];
         });
-        if (lines[lines.length - 1] === "")
-            lines.pop();
         lines.forEach(function (line) {
             var split = line.split(re);
             headers.forEach(function (header) {
                 parsed[header].push(split.shift());
             });
         });
-        var clean = Reader.sanitiseDelimiters(parsed, this.options.delimiter);
+        var clean = Reader.sanitiseDelimiters(parsed);
         return clean;
     };
-    Reader.prototype.parseToObject = function () { };
+    Reader.prototype.parseToArray = function () {
+        var re = Reader.genRegex(this.options);
+        var lines = this.lines.slice(0);
+        var keys = lines
+            .shift()
+            .toString()
+            .split(re);
+        var keyEnd = keys.length - 1;
+        keys[0] = keys[0].substring(1);
+        keys[keyEnd] = keys[keyEnd].substring(0, keyEnd);
+        lines.map(function (line) {
+            var splitLine = line.split(re);
+            // remove the delimiters
+            var end = splitLine.length - 1;
+            splitLine[0] = splitLine[0].substring(1);
+            splitLine[end] = splitLine[end].substring(0, end);
+            var ret = {};
+            keys.forEach(function (key) {
+                var entry = key.toString();
+                ret[entry] = splitLine.shift();
+            });
+            debugger;
+            return ret;
+        });
+    };
     return Reader;
 }());
 exports.Reader = Reader;
