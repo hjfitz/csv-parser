@@ -2,7 +2,7 @@ module.exports = {
   extends: "airbnb",
   rules: {
     "no-console": 0,
-    "arrow-body-style": ["error", "always"],
+    "arrow-body-style": ["error", "as-needed"],
     "react/jsx-filename-extension": [1, { extensions: [".js", ".jsx"] }],
     "react/no-find-dom-node": 0,
     "react/prop-types": 0,

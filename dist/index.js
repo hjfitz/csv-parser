@@ -9015,17 +9015,42 @@ module.exports = function (regExp, replace) {
 
 /***/ }),
 /* 327 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Reader", function() { return Reader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Writer", function() { return Writer; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_fs__ = __webpack_require__(328);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_fs___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_fs__);
+
+class Reader {
+    static readFile(filename, { delimiter = ",", fieldContainer = "", arrayUnderKey = true }) {
+        const csv = __WEBPACK_IMPORTED_MODULE_0_fs___default.a.readFileSync(filename);
+        const lines = csv.toString().split("\n");
+        const resp = arrayUnderKey
+            ? Reader.splitByKey(lines, delimiter, fieldContainer)
+            : Reader.splitToArray(lines, delimiter, fieldContainer);
+        return resp;
+    }
+    static splitByKey(lines, delimiter, container) {
+        const headers = lines.shift();
+        const parsed = {};
+        headers.split(delimiter).forEach(header => (parsed[header] = []));
+    }
+    static splitToArray(lines, delimiter, container) { }
+}
+class Writer {
+    static writeFile(filename, { delimiter, fieldContainer, jsonFormat }) { }
+}
 
 
-module.exports = function () {
-  return new Promise(function (res) {
-    setTimeout(console.log, 100);
-    res();
-  });
-};
+
+/***/ }),
+/* 328 */
+/***/ (function(module, exports) {
+
+
 
 /***/ })
 /******/ ]);
