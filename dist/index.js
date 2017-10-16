@@ -43,30 +43,11 @@ var Reader = /** @class */ (function () {
         var splitLine = line.split(regex);
         return splitLine;
     };
-    /**
-     * Because of how we parse, we need to remove delimiters.
-     * @param dirty uncleaned object
-     * @return cleaned up object!
-     */
-    Reader.sanitiseDelimiters = function (dirty) {
-        var keys = Object.keys(dirty);
-        var firstKey = keys[0];
-        var cleanFirstKey = firstKey.substring(1);
-        var lastKey = keys[keys.length - 1];
-        var cleanLastKey = lastKey.substring(0, lastKey.length - 1);
-        var firstClean = [];
-        var lastClean = [];
-        dirty[firstKey].forEach(function (unClean) {
-            firstClean.push(unClean.substring(1));
-        });
-        dirty[cleanFirstKey] = firstClean;
-        delete dirty[firstKey];
-        dirty[lastKey].forEach(function (unClean) {
-            lastClean.push(unClean.substring(0, unClean.length - 1));
-        });
-        dirty[cleanLastKey] = lastClean;
-        delete dirty[lastKey];
-        return dirty;
+    Reader.removeDelims = function (line) {
+        var end = line.length - 1;
+        line[0] = line[0].substring(1);
+        line[end] = line[end].substring(0, line[end].length - 1);
+        return line;
     };
     Reader.prototype.parseToObject = function () {
         var re = Reader.genRegex(this.options);
@@ -74,7 +55,7 @@ var Reader = /** @class */ (function () {
         var lines = this.lines.slice(0);
         // separate the headers from the information
         var headerLine = lines.shift().toString();
-        var headers = Reader.split(re, headerLine);
+        var headers = Reader.removeDelims(headerLine.split(re));
         var parsed = {};
         // add keys to parsed - we know they're in order this way
         // so we can loop through everything else this way.
@@ -83,30 +64,27 @@ var Reader = /** @class */ (function () {
             parsed[key] = [];
         });
         lines.forEach(function (line) {
-            var split = line.split(re);
+            var split = Reader.removeDelims(line.split(re));
             headers.forEach(function (header) {
-                parsed[header].push(split.shift());
+                var key = header.toString();
+                parsed[key].push(split.shift());
             });
         });
-        var clean = Reader.sanitiseDelimiters(parsed);
-        return clean;
+        return parsed;
     };
     Reader.prototype.parseToArray = function () {
         var re = Reader.genRegex(this.options);
         var lines = this.lines.slice(0);
-        var keys = lines
+        var keys = Reader.removeDelims(lines
             .shift()
             .toString()
-            .split(re);
-        var keyEnd = keys.length - 1;
-        keys[0] = keys[0].substring(1);
-        keys[keyEnd] = keys[keyEnd].substring(0, keyEnd);
+            .split(re));
+        console.log(keys);
         lines.map(function (line) {
             var splitLine = line.split(re);
             // remove the delimiters
-            var end = splitLine.length - 1;
-            splitLine[0] = splitLine[0].substring(1);
-            splitLine[end] = splitLine[end].substring(0, end);
+            splitLine = Reader.removeDelims(splitLine);
+            console.log(splitLine);
             var ret = {};
             keys.forEach(function (key) {
                 var entry = key.toString();
@@ -115,6 +93,7 @@ var Reader = /** @class */ (function () {
             debugger;
             return ret;
         });
+        return lines;
     };
     return Reader;
 }());

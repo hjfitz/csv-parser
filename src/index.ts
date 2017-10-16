@@ -39,31 +39,11 @@ class Reader {
     return splitLine;
   }
 
-  /**
-   * Because of how we parse, we need to remove delimiters.
-   * @param dirty uncleaned object
-   * @return cleaned up object!
-   */
-  static sanitiseDelimiters(dirty): Object {
-    const keys: Array<string> = Object.keys(dirty);
-    const firstKey: string = keys[0];
-    const cleanFirstKey: string = firstKey.substring(1);
-    const lastKey: string = keys[keys.length - 1];
-    const cleanLastKey: string = lastKey.substring(0, lastKey.length - 1);
-    const firstClean: Array<string> = [];
-    const lastClean: Array<string> = [];
-    dirty[firstKey].forEach(unClean => {
-      firstClean.push(unClean.substring(1));
-    });
-    dirty[cleanFirstKey] = firstClean;
-    delete dirty[firstKey];
-
-    dirty[lastKey].forEach(unClean => {
-      lastClean.push(unClean.substring(0, unClean.length - 1));
-    });
-    dirty[cleanLastKey] = lastClean;
-    delete dirty[lastKey];
-    return dirty;
+  static removeDelims(line: String[]): String[] {
+    const end = line.length - 1;
+    line[0] = line[0].substring(1);
+    line[end] = line[end].substring(0, line[end].length - 1);
+    return line;
   }
 
   /**
@@ -84,11 +64,11 @@ class Reader {
   parseToObject(): Object {
     const re: RegExp = Reader.genRegex(this.options);
     // clone the array so that we can shift things around
-    const lines: Array<String> = this.lines.slice(0);
+    const lines: String[] = this.lines.slice(0);
     // separate the headers from the information
     const headerLine: string = lines.shift().toString();
-    const headers: Array<string> = Reader.split(re, headerLine);
-    const parsed = {};
+    const headers: String[] = Reader.removeDelims(headerLine.split(re));
+    const parsed: Object = {};
     // add keys to parsed - we know they're in order this way
     // so we can loop through everything else this way.
     headers.forEach(header => {
@@ -97,43 +77,39 @@ class Reader {
     });
 
     lines.forEach(line => {
-      const split: Array<string> = line.split(re);
+      const split: String[] = Reader.removeDelims(line.split(re));
       headers.forEach(header => {
-        parsed[header].push(split.shift());
+        const key = header.toString();
+        parsed[key].push(split.shift());
       });
     });
-    const clean: Object = Reader.sanitiseDelimiters(parsed);
-    return clean;
+    return parsed;
   }
 
   parseToArray() {
     const re: RegExp = Reader.genRegex(this.options);
 
-    const lines: Array<String> = this.lines.slice(0);
+    const lines: String[] = this.lines.slice(0);
 
-    const keys: Array<String> = lines
-      .shift()
-      .toString()
-      .split(re);
-
-    const keyEnd: number = keys.length - 1;
-    keys[0] = keys[0].substring(1);
-    keys[keyEnd] = keys[keyEnd].substring(0, keyEnd);
+    const keys: String[] = Reader.removeDelims(
+      lines
+        .shift()
+        .toString()
+        .split(re)
+    );
 
     lines.map(line => {
-      const splitLine: Array<String> = line.split(re);
+      let splitLine: String[] = line.split(re);
       // remove the delimiters
-      const end: number = splitLine.length - 1;
-      splitLine[0] = splitLine[0].substring(1);
-      splitLine[end] = splitLine[end].substring(0, end);
+      splitLine = Reader.removeDelims(splitLine);
       const ret: Object = {};
       keys.forEach(key => {
         const entry = key.toString();
         ret[entry] = splitLine.shift();
       });
-      debugger;
       return ret;
     });
+    return lines;
   }
 }
 
