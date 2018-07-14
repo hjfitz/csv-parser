@@ -4,8 +4,13 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "outDir": "dist",
+    "module": "CommonJS",
     "moduleResolution": "node"
   },
-  "exclude": ["node_modules"],
-  "files": ["src/index.ts"]
+  "exclude": [
+    "node_modules"
+  ],
+  "files": [
+    "src/index.ts"
+  ]
 }
